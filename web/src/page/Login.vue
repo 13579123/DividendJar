@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { ElMessage } from 'element-plus';
+import { ElMessage , ElLoading } from 'element-plus';
 import { ref } from 'vue';
 
 const userEmail = ref("")
@@ -39,18 +39,48 @@ async function getCode() {
   if (getCodeTime.value > 0) {
     return
   }
-  getCodeTime.value = 60
-  const inter = setInterval(() => {
-    getCodeTime.value -= 1
-    if (getCodeTime.value === 0) clearInterval(inter)
-  }, 1000);
-  // 发送请求获取验证码
-
+  // 加载动画
+  const loadingInstance = ElLoading.service({
+    lock: true, // 锁定屏幕
+    text: '加载中...', // 自定义文字
+    background: 'rgba(0, 0, 0, 0.7)', // 背景颜色
+    fullscreen: true // 全屏模式
+  })
+  // 发送请求
+  new Promise(res => setTimeout(res , 1000))
+  .then(() => {
+    // 弹出成功提示并且倒计时
+    getCodeTime.value = 60
+    const inter = setInterval(() => {
+      getCodeTime.value -= 1
+      if (getCodeTime.value === 0) clearInterval(inter)
+    }, 1000);
+    ElMessage.success("获取验证码成功")
+  })
+  .finally(() => {
+    // 关闭加载动画
+    loadingInstance.close()
+  })
 }
 
 // 登录或者注册
 async function login() {
-
+  // 加载动画
+  const loadingInstance = ElLoading.service({
+    lock: true, // 锁定屏幕
+    text: '加载中...', // 自定义文字
+    background: 'rgba(0, 0, 0, 0.7)', // 背景颜色
+    fullscreen: true // 全屏模式
+  })
+  // 发送请求
+  new Promise(res => setTimeout(res , 1000))
+  .then(() => {
+    
+  })
+  .finally(() => {
+    // 关闭加载动画
+    loadingInstance.close()
+  })
 }
 
 </script>
