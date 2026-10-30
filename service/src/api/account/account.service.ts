@@ -1,11 +1,26 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { Repository } from "typeorm";
+import { Account } from "../../entity/Account.js";
+import { InjectRepository } from "@nestjs/typeorm";
 
 @Injectable()
 export class AccountService {
 
-    async createAccount() {
-        return "creat account"
-    }
+  constructor(
+    @InjectRepository(Account)
+    private readonly accountRepository: Repository<Account>
+  ) { }
+
+  async findAccount(email: string) {
+    return this.accountRepository.findOne({
+      where: {email},
+    })
+  }
+
+  async createAccount(email: string) {
+    const account = this.accountRepository.create({email})
+    return this.accountRepository.save(account)
+  }
 
 }

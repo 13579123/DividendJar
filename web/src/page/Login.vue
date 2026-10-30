@@ -22,6 +22,8 @@
 </template>
 
 <script setup lang="ts">
+import router from '@/router';
+import { request } from '@/util/request';
 import { ElMessage , ElLoading } from 'element-plus';
 import { ref } from 'vue';
 
@@ -47,15 +49,18 @@ async function getCode() {
     fullscreen: true // 全屏模式
   })
   // 发送请求
-  new Promise(res => setTimeout(res , 1000))
-  .then(() => {
+  request.post("/third/getLoginCode" , { email: userEmail.value })
+  .then(async (result) => {
     // 弹出成功提示并且倒计时
     getCodeTime.value = 60
     const inter = setInterval(() => {
       getCodeTime.value -= 1
       if (getCodeTime.value === 0) clearInterval(inter)
     }, 1000);
-    ElMessage.success("获取验证码成功")
+    ElMessage.success(result.data.message)
+  })
+  .catch((e) => {
+    console.error(e)
   })
   .finally(() => {
     // 关闭加载动画
@@ -73,9 +78,13 @@ async function login() {
     fullscreen: true // 全屏模式
   })
   // 发送请求
-  new Promise(res => setTimeout(res , 1000))
-  .then(() => {
-    
+  request.post("/account/login" , { "email": userEmail.value, "code": userCode.value })
+  .then((result) => {
+    if (!result.data.response) return ElMessage.warning(result.data.message)
+    localStorage.setItem(import.meta.env.VITE_LOCAL_TOKEN_KEY , result.data.response.token)
+    ElMessage.success(result.data.message)
+    // 跳转
+    router.push("/main")
   })
   .finally(() => {
     // 关闭加载动画

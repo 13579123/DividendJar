@@ -15,6 +15,7 @@ const router = useRouter()
 onMounted(() => {
   const localToken = localStorage.getItem(import.meta.env.VITE_LOCAL_TOKEN_KEY)
   if (localToken) {
+    router.push("/main")
   } else {
     router.push("/login")
   }
