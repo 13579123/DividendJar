@@ -6,7 +6,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThirdModule } from './api/third/third.module.js';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PluginModule } from './plugin/plugin.module.js';
-import { Account } from './entity/Account.js';
+import { Account } from './entity/table/Account.js';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './guard/auth.guard.js';
+import { Attention } from './entity/table/Attention.js';
+import { EntityModule } from './entity/entity.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -28,21 +32,28 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
           password: config.get("DB_PWD"),
           database: config.get("DB_DATABASE"),
           // 同步本地的schema与数据库 -> 初始化的时候使用
-          synchronize: false,
-          migrationsRun: config.get("DB_SYNC") === "true",
+          synchronize: config.get("DB_SYNC") === "true",
+          dropSchema: config.get("DB_SYNC") === "true",//this option maybe helpful
           // 设置日志等级
           logging: ['error'],
           // 注入的实体
           entities: [
             Account,
+            Attention,
           ],
         } as TypeOrmModuleOptions
       }
     }),
+    EntityModule,
     PluginModule,
     ApiModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard
+    }
+  ],
 })
 export class AppModule {}

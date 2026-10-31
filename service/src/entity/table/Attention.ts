@@ -1,8 +1,11 @@
-import { Column, CreateDateColumn, Entity, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 // 关注列表
 @Entity("attention")
 export class Attention {
+
+  @PrimaryGeneratedColumn({})
+  id: number = 0
 
   @Column({
     type: 'varchar',

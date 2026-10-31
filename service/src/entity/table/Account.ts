@@ -15,6 +15,23 @@ export class Account {
   email: string = ""
 
   @Column({
+    type: 'varchar',
+    length: 50,
+    name: 'nickname',
+    nullable: false,
+    comment: '昵称',
+  })
+  nickname: string = ""
+
+  @Column({
+    type: "int",
+    nullable: false,
+    default: 0,
+    comment: "权限 0 普通用户 1会员 9管理员"
+  })
+  auth: number = 0
+
+  @Column({
     type: 'tinyint',
     name: 'status',
     nullable: true,

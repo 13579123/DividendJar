@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AccountController } from './account.controller.js';
-import { AccountService } from './account.service.js';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Account } from '../../entity/Account.js';
-import { Attention } from '../../entity/Attention.js';
+import { Account } from '../../entity/table/Account.js';
+import { Attention } from '../../entity/table/Attention.js';
 
 @Module({
   imports: [
@@ -13,7 +12,7 @@ import { Attention } from '../../entity/Attention.js';
     ]),
   ],
   controllers: [AccountController],
-  providers: [AccountService]
+  providers: []
 })
 export class AccountModule {
 

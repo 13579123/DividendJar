@@ -1,13 +1,15 @@
-import { Controller, Get, Req, Headers, Post, Body, HttpException, HttpStatus } from "@nestjs/common";
-import { AccountService } from "./account.service.js";
+import { Controller, Get, Req, Headers, Post, Body, HttpException, HttpStatus, UseGuards } from "@nestjs/common";
 import { RedisService } from "../../plugin/redis/redis.service.js";
 import { LoginDto } from "./dto/login.dto.js";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { LoginVo } from "./vo/login.vo.js";
 import { HttpResult } from "../../util/index.js";
 import { JWTService } from "../../plugin/jwt/jwt.service.js";
-import { Account } from "../../entity/Account.js";
-import { Attention } from "../../entity/Attention.js";
+import { Account } from "../../entity/table/Account.js";
+import { Attention } from "../../entity/table/Attention.js";
+import { AuthGuard } from "../../guard/auth.guard.js";
+import { Roles } from "../../decorator/roles.decorator.js";
+import { AccountService } from "../../entity/service/Account.service.js";
 
 @ApiTags("用户数据")
 @Controller('account')
@@ -39,14 +41,18 @@ export class AccountController {
   }
 
   @Get("accountData")
+  @Roles(0)
   @ApiOperation({ summary: '根据token获取用户信息' })
   @ApiResponse({ example: new HttpResult(new Account , "获取成功") })
   async accountData(@Headers("token") token: string) {
-    const email = this.jwtService.verify(token) as string
-    return new HttpResult(await this.accountService.findAccount(email) , "获取成功")
+    let email: string = this.jwtService.verify(token) as string
+    const account = await this.accountService.findAccount(email)
+    if (!account) return new HttpResult(null , "用户不存在" , HttpStatus.OK , false)
+    return new HttpResult(account , "获取成功")
   }
 
   @Get("attentionList")
+  @Roles(0)
   @ApiOperation({ summary: "获取关注股票的列表" })
   @ApiResponse({ example: new HttpResult([new Attention] , "获取成功") })
   async attentionList(@Headers("token") token: string) {
