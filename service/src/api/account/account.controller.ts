@@ -6,8 +6,10 @@ import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { LoginVo } from "./vo/login.vo.js";
 import { HttpResult } from "../../util/index.js";
 import { JWTService } from "../../plugin/jwt/jwt.service.js";
+import { Account } from "../../entity/Account.js";
+import { Attention } from "../../entity/Attention.js";
 
-@ApiTags("用户")
+@ApiTags("用户数据")
 @Controller('account')
 export class AccountController {
 
@@ -38,8 +40,18 @@ export class AccountController {
 
   @Get("accountData")
   @ApiOperation({ summary: '根据token获取用户信息' })
+  @ApiResponse({ example: new HttpResult(new Account , "获取成功") })
   async accountData(@Headers("token") token: string) {
-    return this.accountService.createAccount("")
+    const email = this.jwtService.verify(token) as string
+    return new HttpResult(await this.accountService.findAccount(email) , "获取成功")
+  }
+
+  @Get("attentionList")
+  @ApiOperation({ summary: "获取关注股票的列表" })
+  @ApiResponse({ example: new HttpResult([new Attention] , "获取成功") })
+  async attentionList(@Headers("token") token: string) {
+    const email = this.jwtService.verify(token) as string
+    return new HttpResult(await this.accountService.findAttention(email) , "获取成功")
   }
 
 }

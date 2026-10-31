@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
 
-export class getLoginCodeto {
+export class getLoginCodDto {
 
   @ApiProperty({
     description: '邮箱',

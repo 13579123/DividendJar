@@ -12,7 +12,7 @@ export class Account {
     comment: '邮箱',
     primary: true
   })
-  email!: string;
+  email: string = ""
 
   @Column({
     type: 'tinyint',
@@ -21,17 +21,17 @@ export class Account {
     default: '0',
     comment: '状态0是正常,1是禁用',
   })
-  status!: number;
+  status: number = 0
 
   
   @CreateDateColumn({ 
     name: 'create_time' 
   })
-  createTime: Date;
+  createTime: Date = new Date
 
   @UpdateDateColumn({ 
     name: 'update_time' 
   })
-  updateTime: Date;
+  updateTime: Date = new Date
   
 }

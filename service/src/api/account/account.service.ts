@@ -14,13 +14,19 @@ export class AccountService {
 
   async findAccount(email: string) {
     return this.accountRepository.findOne({
-      where: {email},
+      where: {email , status: 1},
     })
   }
 
   async createAccount(email: string) {
     const account = this.accountRepository.create({email})
     return this.accountRepository.save(account)
+  }
+
+  async findAttention(email: string) {
+    return this.accountRepository.find({
+      where: {email , status: 1},
+    })
   }
 
 }

@@ -13,7 +13,34 @@ const router = createRouter({
     {
       path: "/main",
       name: "main",
-      component: () => Main
+      component: () => Main,
+      children: [
+        {
+          path: "",
+          name: "main-index",
+          component: () => import('@/page/Main/Index.vue')
+        },
+        {
+          path: "attention",
+          name: "main-attention",
+          component: () => import('@/page/Main/Attention.vue')
+        },
+        {
+          path: "account",
+          name: "main-account",
+          component: () => import('@/page/Main/Account.vue')
+        },
+        {
+          path: "holdings",
+          name: "main-holdings",
+          component: () => import('@/page/Main/Holdings.vue')
+        },
+        {
+          path: "message",
+          name: "main-message",
+          component: () => import('@/page/Main/Message.vue')
+        },
+      ]
     },
   ],
 })

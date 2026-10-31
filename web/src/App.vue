@@ -29,9 +29,12 @@ onMounted(() => {
     padding: 0;
   }
   #application {
+    color: $DefaultColorScheme;
+    fill: $DefaultColorScheme;
     width: 100vw;
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
+    background-color: rgb(245, 245, 245);
   }
 </style>

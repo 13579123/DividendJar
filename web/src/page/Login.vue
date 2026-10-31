@@ -57,7 +57,10 @@ async function getCode() {
       getCodeTime.value -= 1
       if (getCodeTime.value === 0) clearInterval(inter)
     }, 1000);
-    ElMessage.success(result.data.message)
+    if (result.data.success)
+      ElMessage.success(result.data.message)
+    else 
+      ElMessage.warning(result.data.message)
   })
   .catch((e) => {
     console.error(e)
@@ -80,7 +83,7 @@ async function login() {
   // 发送请求
   request.post("/account/login" , { "email": userEmail.value, "code": userCode.value })
   .then((result) => {
-    if (!result.data.response) return ElMessage.warning(result.data.message)
+    if (!result.data.success) return ElMessage.warning(result.data.message)
     localStorage.setItem(import.meta.env.VITE_LOCAL_TOKEN_KEY , result.data.response.token)
     ElMessage.success(result.data.message)
     // 跳转
@@ -156,8 +159,8 @@ async function login() {
       width: 100%;
       height: 50px;
       box-sizing: border-box;
-      border: 1px solid rgba(200, 200, 200, 0.7);
-      background-color: rgba(240, 240, 240, 0.7);
+      border: 1px solid rgba(220, 220, 220, 0.7);
+      background-color: rgba(250, 250, 250, 0.7);
     }
 
     & > button {
