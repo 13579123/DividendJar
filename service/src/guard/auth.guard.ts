@@ -30,13 +30,12 @@ export class AuthGuard implements CanActivate {
     try {
       const email = this.JwtService.verify(token) as string
       const account = await this.accountService.findAccount(email)
-      console.log(account)
       if (!account) throw "登录信息无效"
       if (canActiveRoles && canActiveRoles > account.auth) throw new HttpException("权限不够" , HttpStatus.OK)
       return true
     } catch(e) {
       console.log(e)
-      throw new HttpException("登录信息失效" , HttpStatus.OK)
+      throw new HttpException("登录信息无效" , HttpStatus.OK)
     }
   }
 }

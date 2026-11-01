@@ -10,6 +10,8 @@ import { Attention } from "../../entity/table/Attention.js";
 import { AuthGuard } from "../../guard/auth.guard.js";
 import { Roles } from "../../decorator/roles.decorator.js";
 import { AccountService } from "../../entity/service/Account.service.js";
+import { ChangeNicknameDto } from "./dto/changeNickname.dto.js";
+import { DataSource } from "typeorm";
 
 @ApiTags("用户数据")
 @Controller('account')
@@ -19,6 +21,7 @@ export class AccountController {
     private accountService: AccountService,
     private redisService: RedisService,
     private jwtService: JWTService,
+    private dataSource: DataSource,
   ) {
   }
 
@@ -51,13 +54,13 @@ export class AccountController {
     return new HttpResult(account , "获取成功")
   }
 
-  @Get("attentionList")
+  @Post("changeNickname")
   @Roles(0)
-  @ApiOperation({ summary: "获取关注股票的列表" })
-  @ApiResponse({ example: new HttpResult([new Attention] , "获取成功") })
-  async attentionList(@Headers("token") token: string) {
+  @ApiOperation({ summary: "修改昵称" })
+  @ApiResponse({ example: new HttpResult(null , "修改成功") })
+  async changeNickname(@Headers("token") token: string , @Body() body: ChangeNicknameDto) {
     const email = this.jwtService.verify(token) as string
-    return new HttpResult(await this.accountService.findAttention(email) , "获取成功")
+    return new HttpResult(await this.accountService.updateAccount(email , {nickname: body.nickname}) , "修改成功")
   }
 
 }

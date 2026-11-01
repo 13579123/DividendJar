@@ -1,4 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, PrimaryColumn, Index, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { generateRandomString } from '../../util/index.js';
 
 @Entity("account")
 export class Account {
@@ -20,6 +21,7 @@ export class Account {
     name: 'nickname',
     nullable: false,
     comment: '昵称',
+    default: "用户" + generateRandomString(5)
   })
   nickname: string = ""
 

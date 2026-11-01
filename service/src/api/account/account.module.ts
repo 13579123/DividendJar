@@ -6,10 +6,6 @@ import { Attention } from '../../entity/table/Attention.js';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Account,
-      Attention,
-    ]),
   ],
   controllers: [AccountController],
   providers: []

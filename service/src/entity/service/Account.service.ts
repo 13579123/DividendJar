@@ -12,7 +12,7 @@ export class AccountService {
 
   async findAccount(email: string) {
     return this.accountRepository.findOne({
-      where: { email, status: 1 },
+      where: { email, status: 0 },
     })
   }
 
@@ -23,7 +23,15 @@ export class AccountService {
 
   async findAttention(email: string) {
     return this.accountRepository.find({
-      where: { email, status: 1 },
+      where: { email, status: 0 },
     })
   }
+
+  async updateAccount(email: string , accountEntity: Partial<Account>) {
+    const account = await this.findAccount(email);
+    if (!account) return
+    Object.assign(account , accountEntity);
+    return await this.accountRepository.update(email , account);
+  }
+
 }

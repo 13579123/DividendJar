@@ -23,8 +23,8 @@
 
 <script setup lang="ts">
 import router from '@/router';
-import { request } from '@/util/request';
-import { ElMessage , ElLoading } from 'element-plus';
+import { api, request } from '@/util/request';
+import { ElMessage, ElLoading } from 'element-plus';
 import { ref } from 'vue';
 
 const userEmail = ref("")
@@ -49,26 +49,26 @@ async function getCode() {
     fullscreen: true // 全屏模式
   })
   // 发送请求
-  request.post("/third/getLoginCode" , { email: userEmail.value })
-  .then(async (result) => {
-    // 弹出成功提示并且倒计时
-    getCodeTime.value = 60
-    const inter = setInterval(() => {
-      getCodeTime.value -= 1
-      if (getCodeTime.value === 0) clearInterval(inter)
-    }, 1000);
-    if (result.data.success)
-      ElMessage.success(result.data.message)
-    else 
-      ElMessage.warning(result.data.message)
-  })
-  .catch((e) => {
-    console.error(e)
-  })
-  .finally(() => {
-    // 关闭加载动画
-    loadingInstance.close()
-  })
+  api.third.getLoginCode(userEmail.value)
+    .then(async (result) => {
+      // 弹出成功提示并且倒计时
+      getCodeTime.value = 60
+      const inter = setInterval(() => {
+        getCodeTime.value -= 1
+        if (getCodeTime.value === 0) clearInterval(inter)
+      }, 1000);
+      if (result.data.success)
+        ElMessage.success(result.data.message)
+      else
+        ElMessage.warning(result.data.message)
+    })
+    .catch((e) => {
+      console.error(e)
+    })
+    .finally(() => {
+      // 关闭加载动画
+      loadingInstance.close()
+    })
 }
 
 // 登录或者注册
@@ -81,25 +81,25 @@ async function login() {
     fullscreen: true // 全屏模式
   })
   // 发送请求
-  request.post("/account/login" , { "email": userEmail.value, "code": userCode.value })
-  .then((result) => {
-    if (!result.data.success) return ElMessage.warning(result.data.message)
-    localStorage.setItem(import.meta.env.VITE_LOCAL_TOKEN_KEY , result.data.response.token)
-    ElMessage.success(result.data.message)
-    // 跳转
-    router.push("/main")
-  })
-  .finally(() => {
-    // 关闭加载动画
-    loadingInstance.close()
-  })
+  api.account.login({ email: userEmail.value, code: userCode.value })
+    .then((result) => {
+      if (!result.data.success) return ElMessage.warning(result.data.message)
+      localStorage.setItem(import.meta.env.VITE_LOCAL_TOKEN_KEY, result.data.response.token)
+      ElMessage.success(result.data.message)
+      // 跳转
+      router.push("/main")
+    })
+    .finally(() => {
+      // 关闭加载动画
+      loadingInstance.close()
+    })
 }
 
 </script>
 
 <style scoped lang="scss">
 #login-page {
-  
+
   .background {
     width: 150px;
     height: 150px;
@@ -119,6 +119,7 @@ async function login() {
       &>span {
         margin-bottom: 5px;
       }
+
       display: flex;
       flex-direction: column;
       align-items: start;
@@ -163,7 +164,7 @@ async function login() {
       background-color: rgba(250, 250, 250, 0.7);
     }
 
-    & > button {
+    &>button {
       width: 70%;
       border: none;
       border-radius: 15px;

@@ -4,6 +4,9 @@ import { Entity, Column, PrimaryGeneratedColumn, PrimaryColumn, Index, CreateDat
 @Entity("holdings")
 export class Holdings {
 
+  @PrimaryGeneratedColumn({})
+  id: number = 0
+
   @Index()
   @Column({
     type: 'varchar',
@@ -20,7 +23,7 @@ export class Holdings {
     nullable: false,
     comment: '持仓代码',
   })
-  code: number = 0
+  code: string = ""
 
   @Column({
     type: "float",
