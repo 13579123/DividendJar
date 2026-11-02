@@ -8,7 +8,7 @@ export class Holdings {
 
   code: string = ""
 
-  coast: number = 0
+  cost: number = 0
 
   count: number = 0
 

@@ -75,6 +75,13 @@ export class CompanyData {
   "putype":string =  "--"
 }
 
+// 股票完整信息
+export class StockCompleteData {
+  realTime: StockRealTime = new StockRealTime
+  company: CompanyData = new CompanyData
+  stockData: StockData = new StockData
+}
+
 @Injectable()
 export class Biyi_ApiService {
 
@@ -152,6 +159,15 @@ export class Biyi_ApiService {
       // 返回数据
       return dataResponse
     })
+  }
+
+  // 获取股票完整信息
+  async getStockCompleteData(code: string) {
+    const data = new StockCompleteData
+    data.stockData = await this.getStockData(code)
+    data.company = await this.getCompany(code)
+    data.realTime = await this.getStockRealTimeData(code)
+    return data
   }
 
   // 获取股票基本数据

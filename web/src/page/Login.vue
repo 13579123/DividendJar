@@ -23,7 +23,7 @@
 
 <script setup lang="ts">
 import router from '@/router';
-import { api, request } from '@/util/request';
+import { api, request } from '@/util/api';
 import { ElMessage, ElLoading } from 'element-plus';
 import { ref } from 'vue';
 

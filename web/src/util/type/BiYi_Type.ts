@@ -70,3 +70,10 @@ export class CompanyData {
   "referrer": string = "--"
   "putype": string = "--"
 }
+
+// 股票完整信息
+export class StockCompleteData {
+  realTime: StockRealTime = new StockRealTime
+  company: CompanyData = new CompanyData
+  stockData: StockData = new StockData
+}

@@ -1,6 +1,6 @@
 import axios, { type AxiosResponse } from "axios";
 import type { Holdings } from "./type/Holdings";
-import type { CompanyData, StockRealTime } from "./type/BiYi_Type";
+import type { CompanyData, StockCompleteData, StockRealTime } from "./type/BiYi_Type";
 import type { Account } from "./type/Account";
 
 export const request = axios.create({
@@ -54,6 +54,10 @@ export const api = {
     // 获取实时股票数据
     async stockRealTimeData(code: string): Promise<AxiosResponse<HttpResult<StockRealTime>>> {
       return request.get("/third/stockRealTimeData/" + code)
+    },
+    // 获取完整股票数据
+    async stockCompleteData(code: string): Promise<AxiosResponse<HttpResult<StockCompleteData>>> {
+      return request.get("/third/stockCompleteData/" + code)
     },
   },
 

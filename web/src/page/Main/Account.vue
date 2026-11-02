@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { api, request } from '@/util/request';
+import { api, request } from '@/util/api';
 import { Account } from '@/util/type/Account';
 import { ElLoading, ElLoadingService, ElMessage, ElMessageBox } from 'element-plus';
 import { onMounted, ref } from 'vue';

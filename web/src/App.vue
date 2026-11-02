@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { request } from './util/request';
+import { request } from './util/api';
 import { ElLoading, ElMessage } from 'element-plus';
 
 // 使用路由
@@ -27,14 +27,14 @@ onMounted(() => {
     })
     // 登录信息是否合法
     request.get("/account/accountData")
-    .then((response) => {
-      if (!response.data.success) {
-        ElMessage.warning(response.data.message)
-        router.push("/login")
-      } else {
-        router.push("/main")
-      }
-    }).finally(() => loadingInstance.close())
+      .then((response) => {
+        if (!response.data.success) {
+          ElMessage.warning(response.data.message)
+          router.push("/login")
+        } else {
+          router.push("/main")
+        }
+      }).finally(() => loadingInstance.close())
   } else {
     router.push("/login")
   }
@@ -43,17 +43,18 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-  * {
-    margin: 0;
-    padding: 0;
-  }
-  #application {
-    color: $DefaultColorScheme;
-    fill: $DefaultColorScheme;
-    width: 100vw;
-    height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    background-color: rgb(245, 245, 245);
-  }
+* {
+  margin: 0;
+  padding: 0;
+}
+
+#application {
+  color: $DefaultColorScheme;
+  fill: $DefaultColorScheme;
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: rgb(245, 245, 245);
+}
 </style>

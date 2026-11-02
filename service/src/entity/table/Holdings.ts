@@ -30,7 +30,7 @@ export class Holdings {
     nullable: false,
     comment: '持仓成本',
   })
-  coast: number = 0
+  cost: number = 0
 
   @Column({
     type: "int",

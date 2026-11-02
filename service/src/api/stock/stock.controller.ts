@@ -76,12 +76,12 @@ export class StockController {
       holdings.email = email
       holdings.code = body.code
       // 原来的总成本
-      let allCost = holdings.coast * holdings.count
+      let allCost = holdings.cost * holdings.count
       const cost = body.count * body.cost
-      const charge = cost * body.charge
+      const charge = cost * body.charge < 5 ? 5 : cost * body.charge
       allCost += cost + charge
       holdings.count += body.count
-      holdings.coast = allCost / holdings.count
+      holdings.cost = allCost / holdings.count
       // 是否已经有持仓，有责更新，没有则创建
       if (isUpdate) await queryRunner.manager.update(Holdings, holdings.id, holdings)
       else await queryRunner.manager.save(Holdings, holdings)
