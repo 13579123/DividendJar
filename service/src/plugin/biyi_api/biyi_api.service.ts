@@ -2,6 +2,12 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { RedisService } from "../redis/redis.service.js";
 
+// 股票行业数据
+export class Industry {
+  code: string = "sw_yx"
+  name: string = "A股-申万行业-银行"
+}
+
 // 实时股票数据
 export class StockRealTime {
   "t": string = "2026-10-30 15:35:20"
@@ -68,11 +74,24 @@ export class CompanyData {
   "addr": string = "广东省深圳市罗湖区深南东路5047号"
   "oaddr": string = "中国广东省深圳市福田区益田路5023号平安金融中心B座"
   "desc": string = "本行系在对深圳经济特区原六家信用社改组的同"
-  "bscope":string =  "人民币、外币存贷款;国际、国内结算;票据贴现;外汇买卖;提供担保及信用证服务;提供保管箱服务等。"
-  "idea":string = "所属概念板块"
-  "printype":string =  "--"
-  "referrer":string =  "--"
-  "putype":string =  "--"
+  "bscope": string = "人民币、外币存贷款;国际、国内结算;票据贴现;外汇买卖;提供担保及信用证服务;提供保管箱服务等。"
+  "idea": string = "所属概念板块"
+  "printype": string = "--"
+  "referrer": string = "--"
+  "putype": string = "--"
+}
+
+// 股票分红数据
+export class Dividend {
+  "sdate" = "2026-09-17" // 公告日期yyyy-MM-dd
+  "rdate" = "2026-06-30"// 报告期yyyy-MM-dd（一季报0331、中报0630、三季报0930、年报1231）
+  "give" = "0"// 每10股送股(单位：股)
+  "change" = "0"// 每10股转增(单位：股)
+  "send" = "2.49"// 每10股派息(税前，单位：元)
+  "line" = "实施"// 进度
+  "cdate" = "2026-09-24"// 除权除息日yyyy-MM-dd
+  "edate" = "2026-09-23"// 股权登记日yyyy-MM-dd
+  "hdate" = "--"// 
 }
 
 // 股票完整信息
@@ -80,6 +99,8 @@ export class StockCompleteData {
   realTime: StockRealTime = new StockRealTime
   company: CompanyData = new CompanyData
   stockData: StockData = new StockData
+  industry: Industry[] = [new Industry]
+  dividend: Dividend[] = [new Dividend]
 }
 
 @Injectable()
@@ -142,6 +163,55 @@ export class Biyi_ApiService {
     throw new HttpException("没有可用的license", HttpStatus.OK)
   }
 
+  // 获取股票完整信息
+  async getStockCompleteData(code: string) {
+    const data = new StockCompleteData
+    data.stockData = await this.getStockData(code)
+    data.company = await this.getCompany(code)
+    data.realTime = await this.getStockRealTimeData(code)
+    data.industry = await this.getIndustry(code)
+    data.dividend = await this.getDividend(code)
+    return data
+  }
+
+  // 获取分红数据
+  async getDividend(code: string): Promise<Dividend[]> {
+    // 有缓存拿缓存
+    let stockData = await this.redisService.get(["stock", "dividend", code])
+    if (stockData) return stockData as any
+    return this.sendRequest<Dividend[]>(async (apikey) => {
+      const response = await fetch(`https://api.biyingapi.com/hscp/jnfh/${code}/${apikey}`)
+      const dataResponse = await response.json()
+      if (response.status === 422) {
+        throw new HttpException("错误的股票代码", HttpStatus.OK)
+      }
+      if (response.status !== HttpStatus.OK) throw "无效的apikey"
+      // 缓存数据
+      await this.redisService.set(["stock", "dividend", code], JSON.stringify(dataResponse), 60 * 60 * 24)
+      // 返回数据
+      return dataResponse
+    })
+  }
+
+  // 获取公司行业信息
+  async getIndustry(code: string): Promise<Industry[]> {
+    // 有缓存拿缓存
+    let stockData = await this.redisService.get(["stock", "industry", code])
+    if (stockData) return stockData as any
+    return this.sendRequest<Industry[]>(async (apikey) => {
+      const response = await fetch(`https://api.biyingapi.com/hszg/zg/${code}/${apikey}`)
+      const dataResponse = await response.json()
+      if (response.status === 422) {
+        throw new HttpException("错误的股票代码", HttpStatus.OK)
+      }
+      if (response.status !== HttpStatus.OK) throw "无效的apikey"
+      // 缓存数据
+      await this.redisService.set(["stock", "industry", code], JSON.stringify(dataResponse), 60 * 60 * 24 * 7)
+      // 返回数据
+      return dataResponse
+    })
+  }
+
   // 获取公司基本信息
   async getCompany(code: string): Promise<CompanyData> {
     // 有缓存拿缓存
@@ -159,15 +229,6 @@ export class Biyi_ApiService {
       // 返回数据
       return dataResponse
     })
-  }
-
-  // 获取股票完整信息
-  async getStockCompleteData(code: string) {
-    const data = new StockCompleteData
-    data.stockData = await this.getStockData(code)
-    data.company = await this.getCompany(code)
-    data.realTime = await this.getStockRealTimeData(code)
-    return data
   }
 
   // 获取股票基本数据

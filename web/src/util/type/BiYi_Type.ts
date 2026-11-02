@@ -1,3 +1,10 @@
+
+// 股票行业数据
+export class Industry {
+  code: string = "sw_yx"
+  name: string = "A股-申万行业-银行"
+}
+
 // 实时股票数据
 export class StockRealTime {
   "t": string = "2026-10-30 15:35:20"
@@ -71,9 +78,24 @@ export class CompanyData {
   "putype": string = "--"
 }
 
+// 股票分红数据
+export class Dividend {
+  "sdate" = "2026-09-17" // 公告日期yyyy-MM-dd
+  "rdate" = "2026-06-30"// 报告期yyyy-MM-dd（一季报0331、中报0630、三季报0930、年报1231）
+  "give" = "0"// 每10股送股(单位：股)
+  "change" = "0"// 每10股转增(单位：股)
+  "send" = "2.49"// 每10股派息(税前，单位：元)
+  "line" = "实施"// 进度
+  "cdate" = "2026-09-24"// 除权除息日yyyy-MM-dd
+  "edate" = "2026-09-23"// 股权登记日yyyy-MM-dd
+  "hdate" = "--"// 
+}
+
 // 股票完整信息
 export class StockCompleteData {
   realTime: StockRealTime = new StockRealTime
   company: CompanyData = new CompanyData
   stockData: StockData = new StockData
+  industry: Industry[] = [new Industry]
+  dividend: Dividend[] = [new Dividend]
 }

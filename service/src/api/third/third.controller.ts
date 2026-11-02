@@ -5,7 +5,7 @@ import { generateRandomString, HttpResult } from "../../util/index.js";
 import { RedisService } from "../../plugin/redis/redis.service.js";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { getLoginCodDto } from "./dto/getLoginCode.dto.js";
-import { Biyi_ApiService, CompanyData, StockCompleteData, StockData, StockRealTime } from "../../plugin/biyi_api/biyi_api.service.js";
+import { Biyi_ApiService, CompanyData, Industry, StockCompleteData, StockData, StockRealTime } from "../../plugin/biyi_api/biyi_api.service.js";
 
 @ApiTags("三方")
 @Controller('third')
@@ -39,6 +39,14 @@ export class ThirdController {
   @ApiResponse({ example: new HttpResult(new StockData) })
   async stockData(@Param("code") code: string) {
     const data = await this.biyiApiService.getStockData(code)
+    return new HttpResult(data, "获取股票数据成功")
+  }
+
+  @Get("industry/:code")
+  @ApiOperation({ summary: "股票行业信息" })
+  @ApiResponse({ example: new HttpResult([new Industry]) })
+  async industry(@Param("code") code: string) {
+    const data = await this.biyiApiService.getIndustry(code)
     return new HttpResult(data, "获取股票数据成功")
   }
 

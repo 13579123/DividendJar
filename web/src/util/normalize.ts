@@ -1,7 +1,10 @@
 // 标准化浮点数
 export function normalizeFloat(num: number): string {
-  if (num > 100000) {
-    return (num / 10000).toFixed(2).toString() + "万"
+  function formatDecimalWithCommas(num: number) {
+    let parts = num.toFixed(2).toString().split(".");
+    parts[0] = (parts[0] || "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
   }
-  return num.toFixed(2).toString()
+  if (num > 100000) return formatDecimalWithCommas((num / 10000)) + "万"
+  return formatDecimalWithCommas(num)
 }
