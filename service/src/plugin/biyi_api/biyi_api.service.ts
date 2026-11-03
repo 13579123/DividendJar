@@ -258,7 +258,6 @@ export class Biyi_ApiService {
     return this.sendRequest<StockRealTime>(async (apikey) => {
       const response = await fetch(`https://api.biyingapi.com/hsrl/ssjy/${code}/${apikey}`)
       const dataResponse = await response.json()
-      console.log(dataResponse)
       if (response.status === 422) {
         throw new HttpException("错误的股票代码", HttpStatus.OK)
       }

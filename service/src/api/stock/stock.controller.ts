@@ -34,7 +34,7 @@ export class StockController {
   async holdings(@Headers("token") token: string) {
     const email = this.jwtService.verify(token) as string
     const holdings = await this.holdingsService.findAllHoldings(email)
-    return new HttpResult(holdings, "查询成功")
+    return new HttpResult(holdings.filter(h => h.count > 0), "查询成功")
   }
 
   @Get("attentionList")
@@ -44,6 +44,54 @@ export class StockController {
   async attentionList(@Headers("token") token: string) {
     const email = this.jwtService.verify(token) as string
     return new HttpResult(await this.accountService.findAttention(email), "获取成功")
+  }
+
+  @Post("sellStock")
+  @Roles(0)
+  @ApiOperation({ summary: "卖出股票" })
+  @ApiResponse({ example: new HttpResult(null, "卖出成功") })
+  async sellStock(@Headers("token") token: string, @Body() body: BuyStockDto) {
+    const email = this.jwtService.verify(token) as string
+    const queryRunner = this.dataSource.createQueryRunner()
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction(); // 开启事物
+      // 添加买卖记录
+      const slip = queryRunner.manager.create(Slip)
+      slip.type = SlipType.SELL
+      slip.coast = body.cost
+      slip.code = body.code
+      slip.email = email
+      slip.charge = body.charge
+      slip.count = body.count
+      // 添加记录
+      await queryRunner.manager.save(slip)
+      // 修改持仓 平摊成本
+      let holdings = await queryRunner.manager.findOne(Holdings, { where: { email, code: body.code } })
+      if (!holdings || holdings.count < body.count) {
+        throw "卖出数量超出仓位"
+      }
+      holdings.email = email
+      holdings.code = body.code
+      // 原来的总成本
+      let allCost = holdings.cost * holdings.count
+      const cost = body.count * body.cost
+      const charge = cost * body.charge < 5 ? 5 : cost * body.charge
+      allCost = allCost - cost + charge
+      holdings.count -= body.count
+      holdings.cost = holdings.count === 0 ? 0 : (allCost / holdings.count)
+      // 更新
+      await queryRunner.manager.update(Holdings, holdings.id, holdings)
+      // 提交
+      await queryRunner.commitTransaction()
+      return new HttpResult(null, "卖出成功")
+    } catch (e) {
+      console.error(e)
+      await queryRunner.rollbackTransaction()
+      throw new HttpException(e as string, HttpStatus.OK);
+    } finally {
+      await queryRunner.release()
+    }
   }
 
   @Post("buyStock")

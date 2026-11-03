@@ -66,6 +66,14 @@ export const api = {
     async holdings(): Promise<AxiosResponse<HttpResult<Holdings[]>>> {
       return request.get("/stock/holdings")
     },
+    // 买入股票
+    async buyStock(code: string, cost: number, count: number, charge: number): Promise<AxiosResponse<HttpResult<null>>> {
+      return request.post("/stock/buyStock", { code, cost, count, charge })
+    },
+    // 卖出股票
+    async sellStock(code: string, cost: number, count: number, charge: number): Promise<AxiosResponse<HttpResult<null>>> {
+      return request.post("/stock/sellStock", { code, cost, count, charge })
+    }
   }
 
 }

@@ -46,8 +46,10 @@
       <div class="dividend">
         近三年平均成本股息率
         {{
-          normalizeFloat((getThreeYearHistoryDividend(holdings) / 3) /
-            (holdings.cost) * 100)
+          holdings.cost > 0 ?
+            normalizeFloat((getThreeYearHistoryDividend(holdings) / 3) / (holdings.cost) * 100)
+            :
+            "--"
         }}% ，
         近三年平均现价股息率
         {{
@@ -59,13 +61,13 @@
   </div>
   <!-- 操作界面 -->
   <div class="operation">
-    <div class="deal">
-      交易
-    </div>
+    <div class="deal" @click="router.push(`/deal`)"> 交易 </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
+import router from '@/router';
 import { api, request } from '@/util/api';
 import { normalizeFloat } from '@/util/normalize';
 import type { CompanyData, Industry, StockCompleteData } from '@/util/type/BiYi_Type';
@@ -102,11 +104,11 @@ const bkcw = computed<{ toast: number, bk: { k: string, v: number }[] }>(() => {
 // 根据公司历史名称获取简称
 function getCompanyName(company: CompanyData | undefined) {
   if (!company) return ""
-  if (company.oname) {
+  if (company.oname !== "--") {
     const historyName = company.oname.split(" ")
     return historyName[historyName.length - 1]
   }
-  return company.name
+  return company.name.replace("股份有限公司", "")
 }
 
 // 根据公司行业获取简称
