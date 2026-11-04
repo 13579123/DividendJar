@@ -23,12 +23,20 @@
       </div>
       <div class="base-data">
         <div class="name"> {{ getCompanyName(completeStockDataMap.get(holdings.code)?.company) }} </div>
-        <div class="price"> {{ completeStockDataMap.get(holdings.code)?.realTime.p }} </div>
+        <div class="price">
+          ￥ {{
+            completeStockDataMap.get(holdings.code)?.realTime.p || completeStockDataMap.get(holdings.code)?.realTime.yc
+          }}
+        </div>
       </div>
       <div class="coast">
         <div> {{ holdings.count }}股 @ {{ normalizeFloat(holdings.cost) }}元 </div>
         <div>
-          市值: {{ normalizeFloat((completeStockDataMap.get(holdings.code)?.realTime.p || 1) * holdings.count) }}
+          市值: {{ normalizeFloat(
+            (completeStockDataMap.get(holdings.code)?.realTime.p
+              || completeStockDataMap.get(holdings.code)?.realTime.yc
+              || 1) * holdings.count
+          ) }}
         </div>
       </div>
       <div class="profit">
@@ -39,7 +47,9 @@
         <!-- 盈利情况 -->
         <div :class="['percentage', getProfit(holdings) > 0 ? 'red-color' : 'green-color']">
           {{ getProfit(holdings) > 0 ? "+" : "" }}
-          {{ normalizeFloat(getProfit(holdings) / (holdings.count * holdings.cost) * 100) }}%
+          {{ normalizeFloat(getProfit(holdings) / (holdings.count * (holdings.cost > 0 ? holdings.cost :
+            (completeStockDataMap.get(holdings.code)?.realTime.p
+              || completeStockDataMap.get(holdings.code)?.realTime.yc || 1))) * 100) }}%
         </div>
       </div>
       <div class="line"></div>
@@ -54,14 +64,16 @@
         近三年平均现价股息率
         {{
           normalizeFloat((getThreeYearHistoryDividend(holdings) / 3) /
-            (completeStockDataMap.get(holdings.code)?.realTime.p || 1) * 100)
+            (completeStockDataMap.get(holdings.code)?.realTime.p || completeStockDataMap.get(holdings.code)?.realTime.yc
+              ||
+              1) * 100)
         }}%
       </div>
     </div>
   </div>
   <!-- 操作界面 -->
   <div class="operation">
-    <div class="deal" @click="router.push(`/deal`)"> 交易 </div>
+    <div class="deal" @click="router.push('/deal')"> 交易 </div>
   </div>
 
 </template>
@@ -92,7 +104,7 @@ const bkcw = computed<{ toast: number, bk: { k: string, v: number }[] }>(() => {
   holdingsList.value.forEach(holdings => {
     const stockData = completeStockDataMap.value.get(holdings.code)
     if (!stockData) return
-    const p = holdings.count * stockData.realTime.p
+    const p = holdings.count * (stockData.realTime.p || stockData.realTime.yc)
     toastCw += p
     cwMap.set(getIndustryName(stockData.industry), p)
   })
@@ -135,7 +147,7 @@ function getThreeYearHistoryDividend(holdings: Holdings) {
 function getProfit(holdings: Holdings) {
   const data = completeStockDataMap.value.get(holdings.code)
   if (!data) return 0
-  return data.realTime.p * holdings.count - holdings.cost * holdings.count
+  return (data.realTime.p || data.realTime.yc) * holdings.count - holdings.cost * holdings.count
 }
 
 // 获取持仓
@@ -269,7 +281,7 @@ function getColorByIndex(index: number) {
       .percentage {}
 
       .red-color {
-        color: $redColorScheme;
+        color: $RedColorScheme;
       }
 
       .green-color {

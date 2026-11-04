@@ -5,6 +5,6 @@ export function normalizeFloat(num: number): string {
     parts[0] = (parts[0] || "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join(".");
   }
-  if (num > 100000) return formatDecimalWithCommas((num / 10000)) + "万"
+  if (num > 1000000) return formatDecimalWithCommas((num / 10000)) + "万"
   return formatDecimalWithCommas(num)
 }

@@ -1,7 +1,3 @@
-import Main from '@/page/Main.vue'
-import Login from '@/page/Login.vue'
-import Deal from '@/page/Deal.vue'
-
 import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -10,17 +6,17 @@ const router = createRouter({
     {
       path: "/login",
       name: "login",
-      component: () => Login
+      component: () => import('@/page/Login.vue')
     },
     {
       path: "/deal",
       name: "daeal",
-      component: () => Deal
+      component: () => import('@/page/Deal.vue')
     },
     {
       path: "/main",
       name: "main",
-      component: () => Main,
+      component: () => import('@/page/Main.vue'),
       children: [
         {
           path: "",
