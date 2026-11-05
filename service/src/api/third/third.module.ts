@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ThirdController } from './third.controller.js';
-import { ThirdService } from './third.service.js';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 
@@ -26,7 +25,7 @@ import { ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [ThirdController],
-  providers: [ThirdService]
+  providers: []
 })
 export class ThirdModule {
 

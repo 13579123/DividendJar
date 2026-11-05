@@ -55,11 +55,34 @@
       <div class="industry">
         <div class="year-industry">
           <div> 预计年分红(预计股息) </div>
-          <div> 5333.05<span>(3.33%)</span> </div>
+          <div :class="['data', profit > 0 ? 'red' : 'green']">
+            {{ normalizeFloat(threeYearDividend / 3) }}
+            <span>({{ normalizeFloat((threeYearDividend / 3) / cost * 100) }}%)</span>
+          </div>
         </div>
         <div class="year-industry-percent">
-          <div> 现价股息率(成本股息率) </div>
-          <div> 5.33%<span>(3.33%)</span> </div>
+          <div> 现价股息率 </div>
+          <div :class="['data', profit > 0 ? 'red' : 'green']">
+            {{ normalizeFloat((threeYearDividend / 3) / toastMarketValue * 100) }}%
+          </div>
+        </div>
+      </div>
+      <div class="process">
+        <div class="title">
+          <div> 每年分红目标 </div>
+          <div style="color: #0f0f0f;font-weight: 500;"> 15% </div>
+        </div>
+        <div class="process-box">
+          <div class="process-tub">
+            <div class="process-bar" :style="{ width: '15%' }"></div>
+          </div>
+          <div class="process-dot" :style="{ left: '15%' }">
+            <div class="dot-core"></div>
+          </div>
+        </div>
+        <div class="title">
+          <div> ♦ ￥36000元 </div>
+          <div> 还差 ￥30000元 </div>
         </div>
       </div>
     </div>
@@ -164,6 +187,26 @@ const cost = computed(() => {
   return result
 })
 
+// 计算三年总分红
+const threeYearDividend = computed(() => {
+  let value = 0
+  holdingsList.value.forEach(ho => value += getThreeYearHistoryDividend(ho) * ho.count)
+  return value
+})
+
+
+// 获取金三年每股分红金额
+function getThreeYearHistoryDividend(holdings: Holdings) {
+  const data = completeStockDataMap.value.get(holdings.code)
+  if (!data) return 0
+  let toastDividend = 0
+  const nowYear = new Date().getFullYear()
+  data.dividend.forEach(dividend => {
+    const chaYear = nowYear - new Date(dividend.rdate || dividend.sdate || dividend.edate).getFullYear()
+    if (chaYear > 0 && chaYear <= 3) toastDividend += parseFloat(dividend.send) || 0
+  })
+  return toastDividend / 10
+}
 
 </script>
 
@@ -311,9 +354,75 @@ const cost = computed(() => {
         margin-right: 25px;
       }
 
+      .data {
+        padding-top: 5px;
+      }
+
+      .red {
+        color: $RedColorScheme;
+      }
+
+      .green {
+        color: $GreenColorScheme;
+      }
+
       font-size: 15px;
       display: flex;
     }
+  }
+
+  .process {
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .process-box {
+      .process-tub {
+        .process-bar {
+          height: 100%;
+          background-color: $MainColorScheme;
+        }
+
+        width: 100%;
+        height: 100%;
+        border-radius: 5px;
+        overflow: hidden;
+        background-color: rgba($color: #aaa, $alpha: 0.4);
+      }
+
+      .process-dot {
+        .dot-core {
+          width: 8px;
+          height: 8px;
+          display: block;
+          border-radius: 100%;
+          background-color: white;
+        }
+
+        width: 13px;
+        height: 13px;
+        position: absolute;
+        background-color: $MainColorScheme;
+        top: 50%;
+        transform: translateY(-50%);
+        border-radius: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 5px 1px rgba($color: $MainColorScheme, $alpha: 0.2);
+      }
+
+      position: relative;
+      width: 100%;
+      height: 5px;
+      margin: 10px 0;
+      display: flex;
+    }
+
+    padding-top: 25px;
+    font-size: 15px;
   }
 
   padding-top: 20px;

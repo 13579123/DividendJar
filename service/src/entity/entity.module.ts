@@ -8,6 +8,8 @@ import { Holdings } from './table/Holdings.js';
 import { Slip } from './table/Slip.js';
 import { HoldingsService } from './service/Holdings.service.js';
 import { SlipService } from './service/Slip.service.js';
+import { Target } from './table/Target.js';
+import { TargetService } from './service/Target.service.js';
 
 @Global()
 @Module({
@@ -17,6 +19,7 @@ import { SlipService } from './service/Slip.service.js';
       Attention,
       Holdings,
       Slip,
+      Target,
     ]),
   ],
   providers: [
@@ -24,12 +27,14 @@ import { SlipService } from './service/Slip.service.js';
     AttentionService,
     HoldingsService,
     SlipService,
+    TargetService,
   ],
   exports: [
     AccountService,
     AttentionService,
     HoldingsService,
     SlipService,
+    TargetService,
   ],
 })
 export class EntityModule {

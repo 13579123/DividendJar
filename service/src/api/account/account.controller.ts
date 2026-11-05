@@ -12,6 +12,8 @@ import { Roles } from "../../decorator/roles.decorator.js";
 import { AccountService } from "../../entity/service/Account.service.js";
 import { ChangeNicknameDto } from "./dto/changeNickname.dto.js";
 import { DataSource } from "typeorm";
+import { Target } from "../../entity/table/Target.js";
+import { TargetService } from "../../entity/service/Target.service.js";
 
 @ApiTags("用户数据")
 @Controller('account')
@@ -22,6 +24,7 @@ export class AccountController {
     private redisService: RedisService,
     private jwtService: JWTService,
     private dataSource: DataSource,
+    private targetService: TargetService,
   ) {
   }
 
@@ -61,6 +64,15 @@ export class AccountController {
   async changeNickname(@Headers("token") token: string , @Body() body: ChangeNicknameDto) {
     const email = this.jwtService.verify(token) as string
     return new HttpResult(await this.accountService.updateAccount(email , {nickname: body.nickname}) , "修改成功")
+  }
+
+  @Get("userTrget")
+  @Roles(0)
+  @ApiOperation({ summary: '获取用户目标列表' })
+  @ApiResponse({ example: new HttpResult([new Target] , "获取成功") })
+  async userTarget(@Headers("token") token: string) {
+    const email = this.jwtService.verify(token) as string
+
   }
 
 }

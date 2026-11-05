@@ -1,5 +1,4 @@
 import { Controller, Get, Req, Headers, Post, Body, Param } from "@nestjs/common";
-import { ThirdService } from "./third.service.js";
 import { MailerService } from "@nestjs-modules/mailer";
 import { generateRandomString, HttpResult } from "../../util/index.js";
 import { RedisService } from "../../plugin/redis/redis.service.js";
@@ -12,9 +11,9 @@ import { Biyi_ApiService, CompanyData, Industry, StockCompleteData, StockData, S
 export class ThirdController {
 
   constructor(
-    private thirdService: ThirdService,
     private redisService: RedisService,
     private biyiApiService: Biyi_ApiService,
+    private mailerService: MailerService
   ) {
   }
 
@@ -65,7 +64,11 @@ export class ThirdController {
     const email = body.email
     const code = generateRandomString(5).toLowerCase()
     this.redisService.set(["login", email], code, 60 * 5)
-    this.thirdService.sendMailer(email, "登录验证码", "验证码为 " + code + " 验证码5分钟有效，请尽快使用")
+    this.mailerService.send({
+      to: email,
+      subject: "登录验证码",
+      text: "验证码为 " + code + " 验证码5分钟有效，请尽快使用"
+    })
     return new HttpResult("", "获取验证码成功")
   }
 

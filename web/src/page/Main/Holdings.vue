@@ -55,19 +55,19 @@
       <div class="line"></div>
       <div class="dividend">
         近三年平均成本股息率
-        {{
+        <span style="font-weight: 600;">{{
           holdings.cost > 0 ?
             normalizeFloat((getThreeYearHistoryDividend(holdings) / 3) / (holdings.cost) * 100)
             :
             "--"
-        }}% ，
+        }}%</span> ，
         近三年平均现价股息率
-        {{
+        <span style="font-weight: 600;">{{
           normalizeFloat((getThreeYearHistoryDividend(holdings) / 3) /
             (completeStockDataMap.get(holdings.code)?.realTime.p || completeStockDataMap.get(holdings.code)?.realTime.yc
               ||
               1) * 100)
-        }}%
+        }}%</span>
       </div>
     </div>
   </div>
@@ -137,7 +137,7 @@ function getThreeYearHistoryDividend(holdings: Holdings) {
   let toastDividend = 0
   const nowYear = new Date().getFullYear()
   data.dividend.forEach(dividend => {
-    const chaYear = nowYear - new Date(dividend.rdate).getFullYear()
+    const chaYear = nowYear - new Date(dividend.rdate || dividend.sdate || dividend.edate).getFullYear()
     if (chaYear > 0 && chaYear <= 3) toastDividend += parseFloat(dividend.send) || 0
   })
   return toastDividend / 10

@@ -14,6 +14,7 @@ import { EntityModule } from './entity/entity.module.js';
 import { Holdings } from './entity/table/Holdings.js';
 import { StockModule } from './api/stock/stock.module.js';
 import { Slip } from './entity/table/Slip.js';
+import { Target } from './entity/table/Target.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -45,6 +46,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
             Attention,
             Holdings,
             Slip,
+            Target,
           ],
         } as TypeOrmModuleOptions
       }
