@@ -14,6 +14,11 @@ const router = createRouter({
       component: () => import('@/page/Deal.vue')
     },
     {
+      path: "/target",
+      name: "target",
+      component: () => import('@/page/Target.vue')
+    },
+    {
       path: "/main",
       name: "main",
       component: () => import('@/page/Main.vue'),

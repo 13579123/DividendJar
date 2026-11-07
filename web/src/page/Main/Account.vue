@@ -2,7 +2,7 @@
   <div id="main-account-page">
     <div class="card base-data">
       <div class="avatar-nickname">
-        <img src="" class="avatar">
+        <img :src="AssetWebp" class="avatar">
         <div class="nickname">
           <el-input v-if="isChangeNickname" v-model="accountData.nickname" @blur="changeNicknameFocus"></el-input>
           <div class="name" v-else>{{ accountData.nickname || "用户9527" }}</div>
@@ -31,6 +31,7 @@ import { Account } from '@/util/type/Account';
 import { ElLoading, ElLoadingService, ElMessage, ElMessageBox } from 'element-plus';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import AssetWebp from "@/assets/img/Avatar.webp"
 
 const accountData = ref<Account>(new Account)
 
@@ -112,6 +113,7 @@ function outlogin() {
       .avatar {
         width: 80px;
         height: 80px;
+        border-radius: 100%;
       }
 
       .nickname {

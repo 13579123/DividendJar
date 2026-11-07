@@ -2,6 +2,7 @@ import axios, { type AxiosResponse } from "axios";
 import type { Holdings } from "./type/Holdings";
 import type { CompanyData, StockCompleteData, StockRealTime } from "./type/BiYi_Type";
 import type { Account } from "./type/Account";
+import type { Target } from "./type/Target";
 
 export const request = axios.create({
   baseURL: import.meta.env.VITE_SERVICE_BASE_URL,
@@ -39,6 +40,22 @@ export const api = {
     // 修改昵称
     changeNickname(nickname: string): Promise<AxiosResponse<HttpResult<null>>> {
       return request.post("/account/changeNickname", { nickname: nickname })
+    },
+    // 获取目标列表
+    userTarget(): Promise<AxiosResponse<HttpResult<Target[]>>> {
+      return request.get("/account/userTarget")
+    },
+    // 添加目标
+    addUserTarget(name: string, money: number, icon: number): Promise<AxiosResponse<HttpResult<null>>> {
+      return request.post("/account/addUserTarget", { name, money, icon })
+    },
+    // 修改目标
+    changeuserTarget(target: Target): Promise<AxiosResponse<HttpResult<null>>> {
+      return request.post("/account/changeuserTarget", target)
+    },
+    // 删除目标
+    deleteUserTarget(id: string): Promise<AxiosResponse<HttpResult<null>>> {
+      return request.delete("/account/userTarget/" + id)
     }
   },
 

@@ -73,19 +73,22 @@
   </div>
   <!-- 操作界面 -->
   <div class="operation">
-    <div class="deal" @click="router.push('/deal')"> 交易 </div>
+    <button class="deal" @click="goDeal()"> 分红 </button>
+    <button class="deal" @click="goDeal()"> 交易 </button>
   </div>
 
 </template>
 
 <script setup lang="ts">
-import router from '@/router';
 import { api, request } from '@/util/api';
 import { normalizeFloat } from '@/util/normalize';
 import type { CompanyData, Industry, StockCompleteData } from '@/util/type/BiYi_Type';
 import type { Holdings } from '@/util/type/Holdings';
 import { ElLoading, ElMessage } from 'element-plus';
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
 
 // 持仓列表
 const holdingsList = ref<Holdings[]>([])
@@ -193,6 +196,10 @@ function getColorByIndex(index: number) {
     index = index % colors.length
   }
   return colors[index]
+}
+
+function goDeal() {
+  router.push('/deal')
 }
 
 </script>
@@ -328,6 +335,11 @@ function getColorByIndex(index: number) {
     background-color: $MainColorScheme;
     border-radius: 5px;
     padding: 5px 15px;
+    border: none;
+  }
+
+  button {
+    margin-top: 15px;
   }
 
   position: fixed;

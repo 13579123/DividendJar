@@ -1,5 +1,6 @@
 <template>
   <div id="main-index-page">
+
     <div class="top-area card">
       <div class="msg">
         <div class="day">
@@ -37,7 +38,7 @@
       <div class="profit">
         总收益 &nbsp;
         <span :class="[profit > 0 ? 'red' : 'green']">
-          {{ showOrHidden.profit ? normalizeFloat(profit) : "****" }}({{ normalizeFloat((profit / cost) * 100) }}%)
+          {{ showOrHidden.profit ? normalizeFloat(profit) : "****" }}({{ normalizeFloat((profit / cost) * 100 || 0) }}%)
         </span>
         <span class="show-or-hidden" @click="showOrHidden.profit = !showOrHidden.profit">
           <svg t="1793761942018" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -57,35 +58,88 @@
           <div> 预计年分红(预计股息) </div>
           <div :class="['data', profit > 0 ? 'red' : 'green']">
             {{ normalizeFloat(threeYearDividend / 3) }}
-            <span>({{ normalizeFloat((threeYearDividend / 3) / cost * 100) }}%)</span>
+            <span>({{ normalizeFloat((threeYearDividend / 3) / cost * 100 || 0) }}%)</span>
           </div>
         </div>
         <div class="year-industry-percent">
           <div> 现价股息率 </div>
           <div :class="['data', profit > 0 ? 'red' : 'green']">
-            {{ normalizeFloat((threeYearDividend / 3) / toastMarketValue * 100) }}%
+            {{ normalizeFloat((threeYearDividend / 3) / toastMarketValue * 100 || 0) }}%
           </div>
         </div>
       </div>
       <div class="process">
         <div class="title">
           <div> 每年分红目标 </div>
-          <div style="color: #0f0f0f;font-weight: 500;"> 15% </div>
+          <div style="color: #0f0f0f;font-weight: 500;">
+            {{ normalizeFloat(Math.min(100, (threeYearDividend / 3) / (mothExpenses * 12) * 100)) }}%
+          </div>
         </div>
         <div class="process-box">
           <div class="process-tub">
-            <div class="process-bar" :style="{ width: '15%' }"></div>
+            <div class="process-bar"
+              :style="{ width: Math.min(100, (threeYearDividend / 3) / (mothExpenses * 12) * 100) + '%' }"></div>
           </div>
-          <div class="process-dot" :style="{ left: '15%' }">
+          <div class="process-dot"
+            :style="{ left: Math.min(100, (threeYearDividend / 3) / (mothExpenses * 12) * 100) + '%' }">
             <div class="dot-core"></div>
           </div>
         </div>
         <div class="title">
-          <div> ♦ ￥36000元 </div>
-          <div> 还差 ￥30000元 </div>
+          <div> ♦ ￥{{ normalizeFloat(mothExpenses * 12) }}元 </div>
+          <div> 还差 ￥{{ normalizeFloat(Math.max(mothExpenses * 12 - threeYearDividend / 3, 0)) }}元 </div>
         </div>
       </div>
     </div>
+
+    <div class="card target">
+
+      <div class="title">
+        <span> FIRE 起步</span>
+        <span>
+          <span style="font-size: 15px;font-weight: 400;"> 财务自由进度: </span>
+          {{ normalizeFloat(Math.min(100, (threeYearDividend / 3) / (mothExpenses * 12) * 100)) }}
+          <span style="font-size: 15px;font-weight: 400">%</span>
+        </span>
+      </div>
+
+      <div class="progress">
+        <div class="progress-bar"
+          :style="{ right: normalizeFloat(Math.min(100, 100 - (threeYearDividend / 3) / (mothExpenses * 12) * 100)) + '%' }">
+        </div>
+      </div>
+
+      <div class="moth-cover">
+        每月分红
+        <span style="color: rgb(255, 134, 77);font-weight: 600;font-size: 16px;">￥{{ normalizeFloat(threeYearDividend /
+          3 / 12, 1) }}</span> ·
+        每月支出
+        <span style="color: #000;font-weight: 600;font-size: 16px;">￥{{ normalizeFloat(mothExpenses, 1) }}</span>
+      </div>
+
+      <div class="cover-relation">
+        <div>
+          每年支出
+          <span style="color: #000;font-weight: 600;font-size: 16px;">￥{{ normalizeFloat(mothExpenses * 12, 1) }}</span>
+        </div>
+        <div>
+          已覆盖 &nbsp;<span>{{ coverCount }}/{{ userTarget.length }}</span>
+        </div>
+      </div>
+      <div class="target-list">
+        <div class="target-item" v-for="(target, index) in userTarget" :key="target.id">
+          <div class="icon">
+            <div class="back" :style="{ top: (100 - getTargetCover(index)) + '%' }"></div>
+            <TargetIcon :iconIndex="target.icon" />
+          </div>
+          <span>{{ target.name }}</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <button class="set-target" @click="goEditTarget"> 设 置 目 标 </button>
   </div>
 </template>
 
@@ -95,8 +149,16 @@ import { normalizeFloat } from '@/util/normalize';
 import type { Account } from '@/util/type/Account';
 import type { StockCompleteData } from '@/util/type/BiYi_Type';
 import type { Holdings } from '@/util/type/Holdings';
+import type { Target } from '@/util/type/Target';
 import { ElLoading, ElMessage } from 'element-plus';
 import { computed, onMounted, reactive, ref } from 'vue';
+import TargetIcon from '@/components/share/TargetIcon.vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
+
+// 分红目标
+const userTarget = ref<Target[]>([])
 
 // 用户信息
 const accountData = ref<Account>()
@@ -151,6 +213,17 @@ onMounted(() => {
     .finally(() => loadingInstance.close())
 })
 
+onMounted(() => {
+  // 加载动画
+  const loadingInstance = ElLoading.service()
+  api.account.userTarget()
+    .then((result) => {
+      if (!result.data.success) return ElMessage.warning(result.data.message)
+      userTarget.value = result.data.response
+    })
+    .finally(() => loadingInstance.close())
+})
+
 // 总股数
 const stockCount = computed(() => {
   let value = 0
@@ -194,6 +267,22 @@ const threeYearDividend = computed(() => {
   return value
 })
 
+// 每月开销
+const mothExpenses = computed(() => {
+  let value = 0
+  userTarget.value.forEach(t => value += t.money)
+  return value
+})
+
+// 已经覆盖开销的数量
+const coverCount = computed(() => {
+  let count = 0
+  userTarget.value.forEach((t, i) => {
+    if (getTargetCover(i) === 100) count++
+  })
+  return count
+})
+
 
 // 获取金三年每股分红金额
 function getThreeYearHistoryDividend(holdings: Holdings) {
@@ -206,6 +295,26 @@ function getThreeYearHistoryDividend(holdings: Holdings) {
     if (chaYear > 0 && chaYear <= 3) toastDividend += parseFloat(dividend.send) || 0
   })
   return toastDividend / 10
+}
+
+// 获取当前目标覆盖情况 返回百分比
+function getTargetCover(index: number) {
+  // 每月分红
+  let mothDividend = threeYearDividend.value / 3 / 12
+  for (let i = 0; i < userTarget.value.length; i++) {
+    if (i === index) break
+    const target = userTarget.value[i];
+    if (!target) return 0
+    mothDividend -= target.money
+  }
+  const target = userTarget.value[index];
+  if (!target) return 0
+  return Math.min(100, mothDividend / target.money * 100)
+}
+
+// 前往目标编辑界面
+function goEditTarget() {
+  router.push("/target")
 }
 
 </script>
@@ -406,7 +515,7 @@ function getThreeYearHistoryDividend(holdings: Holdings) {
         position: absolute;
         background-color: $MainColorScheme;
         top: 50%;
-        transform: translateY(-50%);
+        transform: translateY(-50%) translateX(-50%);
         border-radius: 100%;
         display: flex;
         align-items: center;
@@ -423,6 +532,102 @@ function getThreeYearHistoryDividend(holdings: Holdings) {
 
     padding-top: 25px;
     font-size: 15px;
+  }
+
+  .target {
+
+    .title {
+      font-size: 19px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress {
+      .progress-bar {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        border-radius: 5px;
+        background: linear-gradient(to right, #7e7e7e 0%, $MainColorScheme 100%);
+      }
+
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 5px;
+      margin-top: 10px;
+      background-color: rgba($color: #ccc, $alpha: 0.4);
+    }
+
+    .moth-cover {
+      font-size: 15px;
+      padding-top: 10px;
+    }
+
+    .target-list {
+      .target-item {
+        .icon {
+          .back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            background-color: rgba($color: $MainColorScheme, $alpha: 0.3);
+          }
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 50px;
+          height: 50px;
+          border-radius: 100%;
+          overflow: hidden;
+          position: relative;
+          border: 1px solid rgba($color: $MainColorScheme, $alpha: 1.0);
+        }
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        width: 70px;
+        height: 75px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+
+      display: flex;
+      flex-wrap: wrap;
+      padding-top: 15px;
+    }
+
+    .cover-relation {
+      span {
+        font-weight: 500;
+        color: $MainColorScheme;
+      }
+
+      display: flex;
+      padding-top: 10px;
+      justify-content: space-between;
+    }
+
+  }
+
+  .set-target {
+    width: 95%;
+    outline: none;
+    color: white;
+    display: flex;
+    justify-content: center;
+    border: 2px solid $MainColorScheme;
+    background-color: rgba($color: $MainColorScheme, $alpha: 0.6);
+    box-sizing: border-box;
+    margin: 10px auto 0 auto;
+    font-size: 18px;
+    border-radius: 10px;
+    padding: 5px 0;
+    cursor: pointer;
   }
 
   padding-top: 20px;

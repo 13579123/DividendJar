@@ -181,15 +181,23 @@ export class Biyi_ApiService {
     if (stockData) return stockData as any
     return this.sendRequest<Dividend[]>(async (apikey) => {
       const response = await fetch(`https://api.biyingapi.com/hscp/jnfh/${code}/${apikey}`)
-      const dataResponse = await response.json()
+      const dataResponse: Dividend[] = await response.json()
       if (response.status === 422) {
         throw new HttpException("错误的股票代码", HttpStatus.OK)
       }
       if (response.status !== HttpStatus.OK) throw "无效的apikey"
+      const result: Dividend[] = []
+      dataResponse.forEach(dividend => {
+        for (let i = 0; i < result.length; i++) {
+          const divid = result[i];
+          if (divid.sdate === dividend.sdate || divid.rdate === dividend.rdate || divid.edate === dividend.edate) return
+        }
+        result.push(dividend)
+      })
       // 缓存数据
-      await this.redisService.set(["stock", "dividend", code], JSON.stringify(dataResponse), 60 * 60 * 24)
+      await this.redisService.set(["stock", "dividend", code], JSON.stringify(result), 60 * 60 * 24)
       // 返回数据
-      return dataResponse
+      return result
     })
   }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Req, Headers, Post, Body, HttpException, HttpStatus, UseGuards } from "@nestjs/common";
+import { Controller, Get, Req, Headers, Post, Body, HttpException, HttpStatus, UseGuards, Delete, Param } from "@nestjs/common";
 import { RedisService } from "../../plugin/redis/redis.service.js";
 import { LoginDto } from "./dto/login.dto.js";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
@@ -14,6 +14,7 @@ import { ChangeNicknameDto } from "./dto/changeNickname.dto.js";
 import { DataSource } from "typeorm";
 import { Target } from "../../entity/table/Target.js";
 import { TargetService } from "../../entity/service/Target.service.js";
+import { AddUserTargetDto } from "./dto/addUserTarget.dto.js";
 
 @ApiTags("用户数据")
 @Controller('account')
@@ -66,13 +67,45 @@ export class AccountController {
     return new HttpResult(await this.accountService.updateAccount(email , {nickname: body.nickname}) , "修改成功")
   }
 
-  @Get("userTrget")
+  @Get("userTarget")
   @Roles(0)
   @ApiOperation({ summary: '获取用户目标列表' })
   @ApiResponse({ example: new HttpResult([new Target] , "获取成功") })
   async userTarget(@Headers("token") token: string) {
     const email = this.jwtService.verify(token) as string
+    return new HttpResult(await this.targetService.findTarget(email) , "获取成功")
+  }
 
+  @Post("addUserTarget")
+  @Roles(0)
+  @ApiOperation({ summary: '添加用户目标' })
+  @ApiResponse({ example: new HttpResult(null , "添加成功") })
+  async addUserTarget(@Headers("token") token: string , @Body() target: AddUserTargetDto) {
+    const email = this.jwtService.verify(token) as string
+    return new HttpResult(await this.targetService.addUserTarget(email , target.name , target.money , target.icon) , "获取成功")
+  }
+
+  @Post("changeuserTarget")
+  @Roles(0)
+  @ApiOperation({ summary: '修改用户目标' })
+  @ApiResponse({ example: new HttpResult(null , "修改成功") })
+  async changeuserTarget(@Headers("token") token: string , @Body() target: Target) {
+    target.id = parseInt(target.id + "")
+    const email = this.jwtService.verify(token) as string
+    const t = await this.targetService.findTarget(email)
+    if (!t) throw new HttpException("不属于目标用户" , HttpStatus.OK)
+    return new HttpResult(await this.targetService.changeTarget(target , ) , "获取成功")
+  }
+
+  @Delete("userTarget/:id")
+  @Roles(0)
+  @ApiOperation({ summary: '删除用户目标' })
+  @ApiResponse({ example: new HttpResult(null , "获取成功") })
+  async deleteUserTarget(@Headers("token") token: string , @Param("id") id: string) {
+    const email = this.jwtService.verify(token) as string
+    const target = await this.targetService.findTarget(email)
+    if (!target) throw new HttpException("不属于目标用户" , HttpStatus.OK)
+    return new HttpResult(await this.targetService.deleteTarget(parseInt(id)) , "获取成功")
   }
 
 }

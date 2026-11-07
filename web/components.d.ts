@@ -17,5 +17,6 @@ declare module 'vue' {
     ElInput: typeof import('element-plus/es')['ElInput']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TargetIcon: typeof import('./src/components/share/TargetIcon.vue')['default']
   }
 }

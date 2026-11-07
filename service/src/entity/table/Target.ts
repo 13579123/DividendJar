@@ -30,14 +30,14 @@ export class Target {
     nullable: false,
     comment: '开销名称比如房租，水电',
   })
-  name: number = 0
+  name: string = "0"
 
   @Column({
-    type: 'text',
+    type: 'int',
     nullable: false,
-    comment: '开销图标',
+    comment: '开销图标索引',
   })
-  icon: string = ""
+  icon: number = 0
   
   @CreateDateColumn({ 
     name: 'create_time' 
